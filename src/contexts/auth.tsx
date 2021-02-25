@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
+import * as firebase from 'firebase';
 import * as auth from '../services/auth';
+import * as firebaseService from '../services/firebase';
 import api from '../services/api';
 
 interface UserI {
@@ -33,6 +35,14 @@ export const AuthProvider: React.FC = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    firebase.auth().onAuthStateChanged(handleAuthStateChanged);
+  }, []);
+
+  const handleAuthStateChanged = user => {
+    setUser(user);
+  };
+
+  useEffect(() => {
     async function loadStorageData() {
       const storagedUser = await AsyncStorage.getItem('@RNAuth:user');
       const storagedToken = await AsyncStorage.getItem('@RNAuth:token');
@@ -41,9 +51,10 @@ export const AuthProvider: React.FC = ({ children }) => {
 
       if (storagedUser && storagedToken) {
         setUser(JSON.parse(storagedUser));
-        setLoading(false);
         api.defaults.headers.Authorization = `Bearer ${storagedToken}`;
       }
+
+      setLoading(false);
     }
 
     loadStorageData();

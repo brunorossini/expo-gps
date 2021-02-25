@@ -1,27 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Button, StyleSheet, Text } from 'react-native';
+import * as firebase from '../../services/firebase';
 import { useAuth } from '../../contexts/auth';
+import api from '../../services/api';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+import { Container } from './styles';
 
 const Dashboard: React.FC = () => {
   const { signOut, user } = useAuth();
 
+  async function teste() {
+    const token = await firebase.getToken();
+    // api.defaults.headers.Authorization = `Bearer ${token}`;
+    const response = await api.get('/users');
+    console.log(response.data);
+  }
+
+  useEffect(() => {
+    teste();
+  });
+
   function handleSignOut() {
-    signOut();
+    firebase.signOut();
   }
 
   return (
-    <View style={styles.container}>
+    <Container>
       <Text>{user?.name}</Text>
       <Button title="Sign Out" onPress={handleSignOut} />
-    </View>
+    </Container>
   );
 };
 
